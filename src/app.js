@@ -1,17 +1,23 @@
 const express = require("express");
 const cors = require("cors");
 const { PORT } = require("./config/serverConfig");
+const apiRoutes = require("../src/routes/index");
 
 class App {
   constructor() {
     this.app = express();
     this.initializeMiddlewares();
+    this.initializeRoutes();
   }
 
   initializeMiddlewares() {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cors());
+  }
+
+  initializeRoutes() {
+    this.app.use("/api", apiRoutes);
   }
 
   initializeServer() {

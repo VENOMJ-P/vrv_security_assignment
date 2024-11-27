@@ -15,12 +15,6 @@ module.exports = (sequelize, DataTypes) => {
           defaultValue: 3, // Default to 'USER' role
         },
       });
-
-      Role.belongsToMany(models.Permission, {
-        through: models.RolePermission,
-        foreignKey: "roleId",
-        otherKey: "permissionId",
-      });
     }
   }
   Role.init(
@@ -48,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Role",
-      tableName: "roles",
       timestamps: true,
       paranoid: true,
     }

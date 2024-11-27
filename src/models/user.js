@@ -1,5 +1,9 @@
 "use strict";
+const bcrypt = require("bcrypt");
+
 const { Model } = require("sequelize");
+const { SALT } = require("../config/serverConfig");
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -8,7 +12,13 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      User.belongsTo(models.Role);
+      User.belongsTo(models.Role, {
+        foreignKey: {
+          name: "roleId",
+          allowNull: false,
+          defaultValue: 3,
+        },
+      });
     }
   }
   User.init(
@@ -83,10 +93,14 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "User",
-      tableName: "users",
       timestamps: true,
       paranoid: true,
     }
   );
+
+  User.beforeCreate((user) => {
+    const encryptedPassword = bcrypt.hashSync(user.password, SALT);
+    user.password = encryptedPassword;
+  });
   return User;
 };
