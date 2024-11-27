@@ -12,5 +12,7 @@ router.get("/health", (req, res) => {
 });
 
 router.post("/user/signup", validateSignup, userController.signup);
+router.post("/user/signin", validateSignin, userController.signin);
+router.post("/user/logout", userController.logout);
 
 module.exports = router;
