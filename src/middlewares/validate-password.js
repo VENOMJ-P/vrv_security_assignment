@@ -1,3 +1,5 @@
+const { StatusCodes } = require("http-status-codes");
+
 // middleware/validatePassword.js
 const validatePassword = (req, res, next) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
@@ -18,7 +20,7 @@ const validatePassword = (req, res, next) => {
   }
 
   if (errors.length > 0) {
-    return res.status(400).json({ success: false, errors });
+    return res.status(StatusCodes.BAD_REQUEST).json({ success: false, errors });
   }
 
   next();

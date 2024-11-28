@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const { User, Role } = require("../models");
 const { Op } = require("sequelize");
 
@@ -40,7 +41,7 @@ const validateSignup = async (req, res, next) => {
         validationErrors.push("Username is already in use");
       }
     } catch (error) {
-      return res.status(500).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Database error during username validation",
       });
@@ -61,7 +62,7 @@ const validateSignup = async (req, res, next) => {
         validationErrors.push("Email is already in use");
       }
     } catch (error) {
-      return res.status(500).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Database error during email validation",
       });
@@ -97,7 +98,7 @@ const validateSignup = async (req, res, next) => {
 
   // Check if there are any validation errors
   if (validationErrors.length > 0) {
-    return res.status(400).json({
+    return res.status(StatusCodes.BAD_REQUEST).json({
       success: false,
       message: "Something went wrong in user signup",
       data: {},
@@ -135,7 +136,7 @@ const validateSignin = (req, res, next) => {
 
   // If there are validation errors, return them
   if (validationErrors.length > 0) {
-    return res.status(400).json({
+    return res.status(StatusCodes.BAD_REQUEST).json({
       success: false,
       errors: validationErrors,
     });
@@ -172,7 +173,7 @@ const validateUserUpdate = async (req, res, next) => {
           validationErrors.push("Username is already in use");
         }
       } catch (error) {
-        return res.status(500).json({
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           success: false,
           message: "Database error during username validation",
         });
@@ -197,7 +198,7 @@ const validateUserUpdate = async (req, res, next) => {
           validationErrors.push("Email is already in use");
         }
       } catch (error) {
-        return res.status(500).json({
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           success: false,
           message: "Database error during email validation",
         });
@@ -237,7 +238,7 @@ const validateUserUpdate = async (req, res, next) => {
         validationErrors.push("Role does not exist");
       }
     } catch (error) {
-      return res.status(500).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Database error during role validation",
       });
@@ -246,7 +247,7 @@ const validateUserUpdate = async (req, res, next) => {
 
   // Check if there are any validation errors
   if (validationErrors.length > 0) {
-    return res.status(400).json({
+    return res.status(StatusCodes.BAD_REQUEST).json({
       success: false,
       errors: validationErrors,
     });

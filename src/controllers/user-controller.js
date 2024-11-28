@@ -1,3 +1,5 @@
+const { StatusCodes } = require("http-status-codes");
+
 const { UserService } = require("../services/index.js");
 
 const userService = new UserService();
@@ -8,7 +10,7 @@ class UserController {
       const userData = req.body;
       const newUser = await userService.signup(userData);
 
-      res.status(201).json({
+      res.status(StatusCodes.CREATED).json({
         success: true,
         message: "User created successfully",
         data: newUser,
@@ -16,11 +18,11 @@ class UserController {
       });
     } catch (error) {
       console.error("Signup error:", error);
-      res.status(500).json({
+      res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Error creating user",
         data: {},
-        error: error.message,
+        message: error.message || "Failed to create User.",
+        err: error.explanation || error.message || error,
       });
     }
   }
@@ -30,7 +32,7 @@ class UserController {
       const { login, password } = req.body;
       const { token, user } = await userService.signin(login, password, req.ip);
 
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         message: "Signin successful",
         token,
@@ -38,15 +40,17 @@ class UserController {
       });
     } catch (error) {
       console.error("Signin error:", error);
-      res.status(401).json({
+      res.status(error.statusCode || StatusCodes.UNAUTHORIZED).json({
         success: false,
-        message: error.message,
+        data: {},
+        message: error.message || "Failed to signin User.",
+        err: error.explanation || error.message || error,
       });
     }
   }
 
   async logout(req, res) {
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       success: true,
       message: "Logout successful",
     });
@@ -57,12 +61,12 @@ class UserController {
       console.log(req.user.id);
       const user = await userService.getUserProfile(req.user.id);
       if (!user) {
-        return res.status(404).json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           success: false,
           message: "User not found",
         });
       }
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         data: user,
         message: "Successfully get user",
@@ -70,11 +74,11 @@ class UserController {
       });
     } catch (error) {
       console.error("Get profile error:", error);
-      res.status(500).json({
+      res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Error fetching user profile",
-        error: error.message,
         data: {},
+        message: error.message || "Failed to fetch user profile.",
+        err: error.explanation || error.message || error,
       });
     }
   }
@@ -88,12 +92,12 @@ class UserController {
         req.user.roleId
       );
       if (!updatedUser) {
-        return res.status(404).json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           success: false,
           message: "User not found",
         });
       }
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         message: "Profile updated successfully",
         user: updatedUser,
@@ -101,11 +105,11 @@ class UserController {
       });
     } catch (error) {
       console.error("Update profile error:", error);
-      res.status(500).json({
+      res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Error updating user profile",
-        error: error.message,
         data: {},
+        message: error.message || "Failed to update user profile.",
+        err: error.explanation || error.message || error,
       });
     }
   }
@@ -122,18 +126,19 @@ class UserController {
       );
 
       if (!result.success) {
-        return res.status(400).json(result);
+        return res.status(StatusCodes.BAD_REQUEST).json(result);
       }
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         message: "Password updated successfully",
       });
     } catch (error) {
       console.error("Update password error:", error);
-      res.status(500).json({
+      res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Error updating password",
-        error: error.message,
+        data: {},
+        message: error.message || "Failed to update user password.",
+        err: error.explanation || error.message || error,
       });
     }
   }
@@ -144,7 +149,7 @@ class UserController {
         req.params.id,
         req.body
       );
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         message: "User updated successfully",
         user: updatedUser,
@@ -152,11 +157,11 @@ class UserController {
       });
     } catch (error) {
       console.error("Admin user update error:", error);
-      res.status(500).json({
+      res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Error updating user",
-        error: error.message,
         data: {},
+        message: error.message || "Failed to update user.",
+        err: error.explanation || error.message || error,
       });
     }
   }
@@ -168,7 +173,7 @@ class UserController {
       // Only Admins can delete a user
       const response = await userService.deleteUserProfile(userId);
 
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: response.success,
         message: response.message,
         data: response.data,
@@ -176,11 +181,11 @@ class UserController {
       });
     } catch (error) {
       console.error("Error deleting user profile:", error);
-      res.status(500).json({
+      res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Error deleting user profile",
-        error: error.message,
         data: {},
+        message: error.message || "Failed to delete user profile.",
+        err: error.explanation || error.message || error,
       });
     }
   }

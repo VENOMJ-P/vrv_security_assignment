@@ -2,13 +2,14 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
 const { JWT_SECRET } = require("../config/serverConfig");
+const { StatusCodes } = require("http-status-codes");
 
 const authenticateToken = async (req, res, next) => {
   try {
     // Extract token from the Authorization header
     const token = req.headers["authorization"];
     if (!token) {
-      return res.status(401).json({
+      return res.status(StatusCodes.UNAUTHORIZED).json({
         success: false,
         message: "Authorization token is required",
       });
@@ -23,7 +24,7 @@ const authenticateToken = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(StatusCodes.UNAUTHORIZED).json({
         success: false,
         message: "User not found or token is invalid",
       });
@@ -31,7 +32,7 @@ const authenticateToken = async (req, res, next) => {
 
     // Check if user account is active
     if (!user.isActive) {
-      return res.status(403).json({
+      return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
         message: "User account is not active",
       });
@@ -39,7 +40,7 @@ const authenticateToken = async (req, res, next) => {
 
     // Check if the IP matches the one stored in the token (if applicable)
     if (decoded.ip && decoded.ip !== req.ip) {
-      return res.status(403).json({
+      return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
         message: "IP address mismatch",
       });
@@ -59,13 +60,13 @@ const authenticateToken = async (req, res, next) => {
     console.error("Authentication error:", error);
 
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
+      return res.status(StatusCodes.UNAUTHORIZED).json({
         success: false,
         message: "Authentication token has expired",
       });
     }
 
-    return res.status(403).json({
+    return res.status(StatusCodes.FORBIDDEN).json({
       success: false,
       message: "Failed to authenticate token",
     });
@@ -76,14 +77,14 @@ const authenticateToken = async (req, res, next) => {
 const authorizeRoles = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({
+      return res.status(StatusCodes.UNAUTHORIZED).json({
         success: false,
         message: "Authentication required",
       });
     }
 
     if (!roles.includes(req.user.roleId)) {
-      return res.status(403).json({
+      return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
         message: "Insufficient permissions",
       });
