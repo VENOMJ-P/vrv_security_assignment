@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const { UserRepository } = require("../repositories/index.js");
-const { JWT_SECRET } = require("../config/serverConfig.js");
+const { JWT_SECRET, SALT } = require("../config/serverConfig.js");
 
 class UserService {
   constructor() {
@@ -184,7 +184,11 @@ class UserService {
           message: "Current password is incorrect",
         };
       }
-      await this.userRepository.updateUser(userId, newPassword);
+
+      const hashedNewPassword = await bcrypt.hash(newPassword, SALT);
+      await this.userRepository.updateUser(userId, {
+        password: hashedNewPassword,
+      });
 
       return { success: true };
     } catch (error) {

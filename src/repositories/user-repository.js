@@ -83,6 +83,7 @@ class UserRepository {
       const user = await User.findByPk(userId);
       if (!user) throw new Error("User not found");
       // Soft delete the user
+      await user.update({ isActive: false });
       await user.destroy();
       return user.id;
     } catch (error) {
