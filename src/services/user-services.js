@@ -45,7 +45,7 @@ class UserService {
     }
   }
 
-  async signin(login, password) {
+  async signin(login, password, ip) {
     try {
       // Fetch user
       const user = await this.userRepository.findByUsernameOrEmail(login);
@@ -71,6 +71,7 @@ class UserService {
           username: user.username,
           email: user.email,
           roleId: user.roleId,
+          ip,
         },
         JWT_SECRET,
         { expiresIn: "24h" }
@@ -89,6 +90,7 @@ class UserService {
           firstName: user.firstName,
           lastName: user.lastName,
           roleId: user.roleId,
+          userIp: ip,
         },
       };
     } catch (error) {

@@ -28,7 +28,7 @@ class UserController {
   async signin(req, res) {
     try {
       const { login, password } = req.body;
-      const { token, user } = await userService.signin(login, password);
+      const { token, user } = await userService.signin(login, password,req.ip);
 
       res.status(200).json({
         success: true,
