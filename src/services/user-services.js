@@ -12,14 +12,7 @@ class UserService {
   }
   async signup(userData) {
     try {
-      const {
-        username,
-        email,
-        password,
-        firstName,
-        lastName,
-        roleId = 3,
-      } = userData;
+      const { username, email, password, firstName, lastName } = userData;
 
       // Prepare user data for creation
       const userToCreate = {
@@ -28,7 +21,7 @@ class UserService {
         password,
         firstName,
         lastName,
-        roleId,
+        roleId: 3,
         isActive: true,
         lastLogin: null,
       };
