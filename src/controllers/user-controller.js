@@ -49,12 +49,6 @@ class UserController {
     }
   }
 
-  async logout(req, res) {
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Logout successful",
-    });
-  }
   // Get user profile
   async getUserProfile(req, res) {
     try {

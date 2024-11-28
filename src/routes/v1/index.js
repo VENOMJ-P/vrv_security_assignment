@@ -33,9 +33,6 @@ router.post("/user/signup", validateSignup, userController.signup);
 // Access: Public
 router.post("/user/signin", validateSignin, userController.signin);
 
-// Uncomment if you plan to implement user logout functionality
-// router.post("/user/logout", userController.logout);
-
 // Route to fetch the profile of the logged-in user
 // Access: Authenticated users (roles: Admin, Moderator, User)
 router.get("/profile", authenticateToken, userController.getUserProfile);
