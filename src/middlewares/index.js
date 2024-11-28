@@ -3,11 +3,9 @@ const {
   validateSignup,
   validateUserUpdate,
 } = require("./validate-user");
-const validatePassword = require("../middlewares/validate-password");
-const {
-  authenticateToken,
-  authorizeRoles,
-} = require("../middlewares/authenticate");
+const validatePassword = require("./validate-password");
+const { authenticateToken, authorizeRoles } = require("./authenticate");
+const validateProduct = require("./validateProduct");
 
 module.exports = {
   validateSignin,
@@ -16,4 +14,5 @@ module.exports = {
   authenticateToken,
   authorizeRoles,
   validateUserUpdate,
+  validateProduct,
 };
