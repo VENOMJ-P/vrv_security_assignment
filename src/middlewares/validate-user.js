@@ -1,4 +1,5 @@
-const { User } = require("../models");
+const { User, Role } = require("../models");
+const { Op } = require("sequelize");
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,7 +20,6 @@ const validatePasswordStrength = (password) => {
 
 const validateSignup = async (req, res, next) => {
   const { username, email, password, firstName, lastName } = req.body;
-  console.log(req.body);
 
   const validationErrors = [];
 
@@ -144,7 +144,119 @@ const validateSignin = (req, res, next) => {
   next();
 };
 
+// middleware/validateUserUpdate.js
+
+const validateUserUpdate = async (req, res, next) => {
+  const { username, email, firstName, lastName, isActive, roleId } = req.body;
+
+  const validationErrors = [];
+
+  // Username validation (if provided)
+  if (username) {
+    if (username.length < 5 || username.length > 50) {
+      validationErrors.push("Username must be between 5 and 50 characters");
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      validationErrors.push(
+        "Username can only contain letters, numbers, and underscores"
+      );
+    } else {
+      // Check username uniqueness in database
+      try {
+        const existingUsername = await User.findOne({
+          where: {
+            username,
+            id: { [Op.ne]: req.user.id }, // Exclude current user
+          },
+        });
+        if (existingUsername) {
+          validationErrors.push("Username is already in use");
+        }
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error during username validation",
+        });
+      }
+    }
+  }
+
+  // Email validation (if provided)
+  if (email) {
+    if (!validateEmail(email)) {
+      validationErrors.push("Invalid email format");
+    } else {
+      // Check email uniqueness in database
+      try {
+        const existingEmail = await User.findOne({
+          where: {
+            email,
+            id: { [Op.ne]: req.user.id }, // Exclude current user
+          },
+        });
+        if (existingEmail) {
+          validationErrors.push("Email is already in use");
+        }
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error during email validation",
+        });
+      }
+    }
+  }
+
+  // First name validation (if provided)
+  if (firstName) {
+    if (firstName.length < 2 || firstName.length > 150) {
+      validationErrors.push("First name must be between 2 and 150 characters");
+    } else if (!/^[a-zA-Z\s]+$/.test(firstName)) {
+      validationErrors.push("First name can only contain letters");
+    }
+  }
+
+  // Last name validation (if provided)
+  if (lastName) {
+    if (lastName.length < 2 || lastName.length > 150) {
+      validationErrors.push("Last name must be between 2 and 150 characters");
+    } else if (!/^[a-zA-Z\s]+$/.test(lastName)) {
+      validationErrors.push("Last name can only contain letters");
+    }
+  }
+
+  // isActive validation (if provided)
+  if (isActive !== undefined && typeof isActive !== "boolean") {
+    validationErrors.push("isActive must be a boolean value");
+  }
+
+  // Role validation (if provided)
+  if (roleId) {
+    // Assuming you have a Role model to check against
+    try {
+      const role = await Role.findByPk(roleId);
+      if (!role) {
+        validationErrors.push("Role does not exist");
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Database error during role validation",
+      });
+    }
+  }
+
+  // Check if there are any validation errors
+  if (validationErrors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      errors: validationErrors,
+    });
+  }
+
+  next();
+};
+
 module.exports = {
   validateSignup,
   validateSignin,
+  validateUserUpdate,
 };

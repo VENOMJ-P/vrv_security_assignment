@@ -102,5 +102,12 @@ module.exports = (sequelize, DataTypes) => {
     const encryptedPassword = bcrypt.hashSync(user.password, SALT);
     user.password = encryptedPassword;
   });
+
+  User.beforeUpdate((user) => {
+    if (user.password) {
+      const encryptedPassword = bcrypt.hashSync(user.password, SALT);
+      user.password = encryptedPassword;
+    }
+  });
   return User;
 };

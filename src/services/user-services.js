@@ -40,7 +40,7 @@ class UserService {
 
       return userResponse;
     } catch (error) {
-      console.log("Something went wrong in user services");
+      console.log("Something went wrong in user services", error);
       throw error;
     }
   }
@@ -94,7 +94,110 @@ class UserService {
         },
       };
     } catch (error) {
-      console.log("Something went wrong in user service");
+      console.log("Something went wrong in user service", error);
+      throw error;
+    }
+  }
+
+  async getUserProfile(userId) {
+    try {
+      return await this.userRepository.findUserWithRole(userId);
+    } catch (error) {
+      console.log("Something went wrong in user service", error);
+      throw error;
+    }
+  }
+
+  // Update user profile
+  async updateUserProfile(userId, data, roleId) {
+    try {
+      const { username, email, firstName, lastName, isActive } = data;
+
+      const user = await this.userRepository.findUserById(userId);
+      if (!user) return null;
+
+      const updateData = {};
+      if (username) updateData.username = username;
+      if (email) updateData.email = email;
+      if (firstName) updateData.firstName = firstName;
+      if (lastName) updateData.lastName = lastName;
+
+      // Allow only admin roles to update isActive
+      if (isActive !== undefined && (roleId === 1 || roleId === 2)) {
+        updateData.isActive = isActive;
+      }
+
+      return await this.userRepository.updateUser(userId, updateData);
+    } catch (error) {
+      console.log("Something went wrong in user service", error);
+      throw error;
+    }
+  }
+
+  // Update user password
+  async updatePassword(
+    userId,
+    currentPassword,
+    newPassword,
+    confirmNewPassword
+  ) {
+    try {
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        return {
+          success: false,
+          message: "All password fields are required",
+        };
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        return {
+          success: false,
+          message: "New passwords do not match",
+        };
+      }
+
+      const passwordStrengthRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordStrengthRegex.test(newPassword)) {
+        return {
+          success: false,
+          message: "New password must meet complexity requirements",
+        };
+      }
+
+      const user = await this.userRepository.findUserById(userId);
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+        };
+      }
+
+      const isCurrentPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+
+      if (!isCurrentPasswordValid) {
+        return {
+          success: false,
+          message: "Current password is incorrect",
+        };
+      }
+      await this.userRepository.updateUser(userId, newPassword);
+
+      return { success: true };
+    } catch (error) {
+      console.log("Something went wrong in user service", error);
+      throw error;
+    }
+  }
+
+  async adminUpdateUser(userId, updateData) {
+    try {
+      return this.userRepository.updateUser(userId, updateData);
+    } catch (error) {
+      console.log("Something went wrong in user service", error);
       throw error;
     }
   }
