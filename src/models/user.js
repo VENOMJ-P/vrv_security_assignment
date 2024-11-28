@@ -99,13 +99,15 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.beforeCreate((user) => {
-    const encryptedPassword = bcrypt.hashSync(user.password, SALT);
+    const saltRound = SALT || 10;
+    const encryptedPassword = bcrypt.hashSync(user.password, saltRound);
     user.password = encryptedPassword;
   });
 
   User.beforeUpdate((user) => {
     if (user.password) {
-      const encryptedPassword = bcrypt.hashSync(user.password, SALT);
+      const saltRound = SALT || 10;
+      const encryptedPassword = bcrypt.hashSync(user.password, saltRound);
       user.password = encryptedPassword;
     }
   });

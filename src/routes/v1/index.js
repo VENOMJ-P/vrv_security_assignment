@@ -50,4 +50,11 @@ router.patch(
   userController.adminUpdateUser
 );
 
+router.delete(
+  "/user/:id",
+  authenticateToken,
+  authorizeRoles([1]),
+  userController.deleteUserProfile
+);
+
 module.exports = router;

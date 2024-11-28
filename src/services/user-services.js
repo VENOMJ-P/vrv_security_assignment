@@ -201,6 +201,20 @@ class UserService {
       throw error;
     }
   }
+
+  async deleteUserProfile(userId) {
+    try {
+      const response = await this.userRepository.deleteUser(userId);
+      return {
+        success: true,
+        message: "User profile deleted successfully",
+        data: response,
+      };
+    } catch (error) {
+      console.log("Error deleting user profile:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = UserService;

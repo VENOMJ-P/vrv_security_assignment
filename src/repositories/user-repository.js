@@ -76,6 +76,20 @@ class UserRepository {
       throw error;
     }
   }
+
+  // Update user
+  async deleteUser(userId) {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) throw new Error("User not found");
+      // Soft delete the user
+      await user.destroy();
+      return user.id;
+    } catch (error) {
+      console.log("Something went wrong in user-repository", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = UserRepository;

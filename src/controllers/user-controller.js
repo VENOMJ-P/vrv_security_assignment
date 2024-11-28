@@ -160,6 +160,30 @@ class UserController {
       });
     }
   }
+
+  async deleteUserProfile(req, res) {
+    try {
+      const userId = req.params.id;
+
+      // Only Admins can delete a user
+      const response = await userService.deleteUserProfile(userId);
+
+      res.status(200).json({
+        success: response.success,
+        message: response.message,
+        data: response.data,
+        error: {},
+      });
+    } catch (error) {
+      console.error("Error deleting user profile:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error deleting user profile",
+        error: error.message,
+        data: {},
+      });
+    }
+  }
 }
 
 module.exports = UserController;
