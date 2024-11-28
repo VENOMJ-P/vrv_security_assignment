@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { PORT } = require("./config/serverConfig");
 const apiRoutes = require("../src/routes/index");
+const limiter = require("./utils/rateLimiter")
 
 class App {
   constructor() {
@@ -14,6 +15,7 @@ class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cors());
+    this.app.use("/api", limiter);
   }
 
   initializeRoutes() {
