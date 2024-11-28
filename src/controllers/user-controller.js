@@ -183,6 +183,31 @@ class UserController {
       });
     }
   }
+
+  async logout(req, res) {
+    try {
+      // Get the token from Authorization header
+      const token = req.headers.authorization;
+
+      if (!token) {
+        return res.status(401).json({ message: "No token provided" });
+      }
+
+      const response = await userService.logout(token);
+
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: response.message || "Logout successful",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        data: {},
+        message: error.message || "Failed to logout user profile.",
+        err: error.explanation || error.message || error,
+      });
+    }
+  }
 }
 
 module.exports = UserController;

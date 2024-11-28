@@ -74,6 +74,11 @@ router.delete(
   userController.deleteUserProfile
 );
 
+// Route for user logout
+// Access: Public
+
+router.post("/user/logout", authenticateToken, userController.logout);
+
 /*
     Product Routes
 */

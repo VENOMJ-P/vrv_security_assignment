@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken");
-const { User } = require("../models");
 
+const { User } = require("../models");
 const { JWT_SECRET } = require("../config/serverConfig");
 const { StatusCodes } = require("http-status-codes");
+const redisClient = require("../config/redisClient");
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -13,6 +14,13 @@ const authenticateToken = async (req, res, next) => {
         success: false,
         message: "Authorization token is required",
       });
+    }
+
+    // Check if token is blacklisted
+    const isBlacklisted = await redisClient.get(`blacklisted_token:${token}`);
+
+    if (isBlacklisted) {
+      return res.status(401).json({ message: "Token is no longer valid" });
     }
 
     // Verify the token and decode payload

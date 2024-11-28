@@ -5,6 +5,7 @@ const { StatusCodes } = require("http-status-codes");
 const { UserRepository } = require("../repositories/index.js");
 const { JWT_SECRET, SALT } = require("../config/serverConfig.js");
 const { AppError, ClientError, ValidationError } = require("../utils/errors");
+const redisClient = require("../config/redisClient.js");
 
 class UserService {
   constructor() {
@@ -340,6 +341,43 @@ class UserService {
         "Failed to delete user profile",
         error.message ||
           "An unexpected error occurred while deleting user profile",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async logout(token) {
+    try {
+      // Decode the token to get expiration
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Calculate the remaining time until token expiration
+      const currentTime = Math.floor(Date.now() / 1000);
+      const remainingTime = decoded.exp - currentTime;
+
+      // Blacklist the token in Redis
+      if (remainingTime > 0) {
+        await redisClient.set(
+          `blacklisted_token:${token}`,
+          "true",
+          "EX",
+          remainingTime
+        );
+      }
+      return {
+        success: true,
+        message: "User profile logout successfully",
+      };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        throw error;
+      }
+
+      console.log("Error deleting user profile:", error);
+      throw new AppError(
+        "LogoutError",
+        "Failed to logout user",
+        error.message || "An unexpected error occurred while logout user",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
